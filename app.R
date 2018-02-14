@@ -6,7 +6,7 @@
 #
 #    http://shiny.rstudio.com/
 #
-
+library(magick)
 # the original code is written by Prof. John Staudenmayer(http://people.math.umass.edu/~jstauden/) and post on Prof. Leonard A. Stefanski's website(http://www4.stat.ncsu.edu/~stefansk/). I made some modifications for my blog posts and please refer to the comments in the following code.
 
 # the following code is the same with Prof. John Staudenmayer's R script
@@ -158,7 +158,7 @@ ui <- fluidPage(
       mainPanel(
          plotOutput("plot"),
          h4("Data"),
-         dataTableOutput("datatable"),
+         # dataTableOutput("datatable"),
          p(downloadButton('data', 'Download Data'))
       )
    )
@@ -211,11 +211,6 @@ server <- function(input, output) {
                                 }
                                 
                                 }) 
-        # show the table
-        output$datatable <- DT::renderDataTable({
-                                data <- datainput()
-                                return(data)
-                        })
         # show the download
         output$data = downloadHandler('data.csv', content = function(file) {
                                 data <- datainput()
