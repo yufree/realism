@@ -154,6 +154,12 @@ ui <- fluidPage(
                 
                 # Show a plot of the generated distribution
                 mainPanel(
+                        h4("This is a gift for my girlfriend: Dr. Ping Lu"),
+                        h4("Usage"),
+                        p('Upload you image in the left panel and wait for a while'),
+                        p('Download data in the right panel and sent to the one you loved'),
+                        p('She/He need to use regression analysis(Y~X) to find the plot in the residual plot'),
+                        p('Credits should give to Prof. Leonard A. Stefanski and Prof. John Staudenmayer and you could find more info here:https://www4.stat.ncsu.edu/~stefanski/NSF_Supported/Hidden_Images/stat_res_plots.html'),
                         plotOutput("plot"),
                         h4("Data"),
                         # dataTableOutput("datatable"),
