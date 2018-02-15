@@ -1,12 +1,13 @@
 name: realism
-title: realism
+title:
 username:
 account: yufreecas
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 281103
-bundleId: 1222481
+bundleId: 1223747
 url: https://yufreecas.shinyapps.io/realism/
-when: 1518603788.6893
+when: 1518655828.38428
 asMultiple: FALSE
 asStatic: FALSE
+ignoredFiles: apptest.R
