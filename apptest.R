@@ -140,85 +140,83 @@ library(shiny)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-        
-        # Application title
-        titlePanel("Hidden Love"),
-        
-        # Sidebar with a slider input for number of bins 
-        sidebarLayout(
-                sidebarPanel(
-                        fileInput('image',
-                                  label = 'image files',
-                                  accept = c('.png','.jpg', '.bmp'))
-                ),
-                
-                # Show a plot of the generated distribution
-                mainPanel(
-                        plotOutput("plot"),
-                        h4("Data"),
-                        # dataTableOutput("datatable"),
-                        p(downloadButton('data', 'Download Data'))
-                )
-        )
+   
+   # Application title
+   titlePanel("Hidden Love"),
+   
+   # Sidebar with a slider input for number of bins 
+   sidebarLayout(
+      sidebarPanel(
+              fileInput('image',
+                        label = 'image files',
+                        accept = c('.png','.jpg', '.bmp')),
+              sliderInput('width','width',min = 100,max = 500,value = 200),
+              sliderInput('height','height',min = 100,max = 500,value = 200)
+      ),
+      
+      # Show a plot of the generated distribution
+      mainPanel(
+         plotOutput("plot"),
+         h4("Data"),
+         # dataTableOutput("datatable"),
+         p(downloadButton('data', 'Download Data'))
+      )
+   )
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
         datainput <- reactive({
                 if (!is.null(input$image$datapath)){
-                        image <- image_read(input$image$datapath)
-                        z <- image_convert(image, format = 'pbm', type = 'Bilevel', colorspace = 'gray')
-                        z <- image_rotate(z,180)
-                        z <- image_resize(z, '200x200!')
-                        z1 <- image_data(z,channels = 'gray')
-                        t0 <- t <- c(as.numeric(z1))
-                        t[t0<=1] <- 1
-                        t[t0==1] <- 0
-
-                        # the following code is the same with Prof. John Staudenmayer's R script
-                        
-                        # The code below makes it into "scatterplot" format.
-                        x <- rep(1:dim(z1)[3],each=dim(z1)[2])
-                        y <- rep(1:dim(z1)[2],times=dim(z1)[3])
-                        x <- -x[t==1]
-                        y <- y[t==1]
-                        
-                        # Augment the data to make x and y orthogonal.
-                        
-                        picture <- find.bord(x,y,blur.sd=0)
-                        Yhat <- picture$x
-                        R0 <- picture$y
-                        
-                        data <- find.regression(Yhat,R0,coef.det=.05,p=5,j=1,eps=10e-13)
-                        # data$X has covariates (without intercept)
-                        # data$Y has response.
-                        colnames(data) <- c('Y', 'X1','X2','X3','X4','X5')
+                        file = paste0("convert '", input$image$datapath, "' -resize ",input$width,'x',input$height, ' -extent ',input$width,'x',input$height, " -monochrome -compress none 'fig.pbm'") 
+                        system('apt-get install -y imagemagick')
+                        system(file)
+                
+                temp <- scan("fig.pbm",skip = 1)
+                # the following code is the same with Prof. John Staudenmayer's R script
+                
+                # The code below makes it into "scatterplot" format.
+                y <- rep(1:temp[2],each=temp[1])
+                x <- rep(1:temp[1],times=temp[2])
+                y <- -y[temp[-(1:2)]==1]
+                x <- x[temp[-(1:2)]==1]
+                
+                # Augment the data to make x and y orthogonal.
+                
+                picture <- find.bord(x,y,blur.sd=0)
+                Yhat <- picture$x
+                R0 <- picture$y
+                
+                data <- find.regression(Yhat,R0,coef.det=.05,p=5,j=1,eps=10e-13)
+                # data$X has covariates (without intercept)
+                # data$Y has response.
+                colnames(data) <- c('Y', 'X1','X2','X3','X4','X5')
                         return(data)
                 }else{
                         return(NULL)
                 }
         })
-        output$plot <- renderPlot({
-                data <- datainput()
-                if(is.null(data)){
-                        plot(1,1,type = 'n',
-                             main="Residual plot from data",
-                             xlab = 'fitted',
-                             ylab = 'res')
-                }else{
-                        reg <- lm(Y~ .,data=data)
-                        plot(reg$fitted,reg$resid,pch=16,
-                             main="Residual plot from data",
-                             xlab = 'fitted',
-                             ylab = 'res')
-                }
-                
-        }) 
+                output$plot <- renderPlot({
+                                data <- datainput()
+                                if(is.null(data)){
+                                        plot(1,1,type = 'n',
+                                             main="Residual plot from data",
+                                             xlab = 'fitted',
+                                             ylab = 'res')
+                                }else{
+                                        reg <- lm(Y~ .,data=data)
+                                        plot(reg$fitted,reg$resid,pch=16,
+                                             main="Residual plot from data",
+                                             xlab = 'fitted',
+                                             ylab = 'res')
+                                }
+                                
+                                }) 
         # show the download
         output$data = downloadHandler('data.csv', content = function(file) {
-                data <- datainput()
-                write.csv(data, file)
-        })
+                                data <- datainput()
+                                write.csv(data, file)
+                        })
 }
 
 # Run the application 
