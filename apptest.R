@@ -147,6 +147,8 @@ ui <- fluidPage(
    # Sidebar with a slider input for number of bins 
    sidebarLayout(
       sidebarPanel(
+              # add ga code
+              tags$head(includeScript("ga.js")),
               fileInput('image',
                         label = 'image files',
                         accept = c('.png','.jpg', '.bmp')),
